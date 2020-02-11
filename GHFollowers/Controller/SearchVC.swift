@@ -26,12 +26,13 @@ class SearchVC: UIViewController {
         configureUsernameTextField()
         configureGetFollowersButton()
         createDismissKeyboardTapGesture()
+        usernameTextField.text = "SAllen0400"
     }
     
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.isNavigationBarHidden = true
+        navigationController?.setNavigationBarHidden(true, animated: true)
     }
     
     
