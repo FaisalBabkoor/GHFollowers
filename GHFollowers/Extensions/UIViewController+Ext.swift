@@ -7,12 +7,13 @@
 //
 
 import UIKit
+import SafariServices
 
 fileprivate var containerView: UIView!
 
 extension UIViewController {
     
-    func presentGFAlertOnMainThrid(alertTitle: String, message: String, buttonTitle: String) {
+    func presentGFAlertOnMainThread(alertTitle: String, message: String, buttonTitle: String) {
         DispatchQueue.main.async {
             let alertVC = GFAlertVC(alertTitle: alertTitle, message: message, buttonTitle: buttonTitle)
             alertVC.modalPresentationStyle = .overFullScreen
@@ -54,4 +55,11 @@ extension UIViewController {
         emptyStateView.frame = view.bounds
         view.addSubview(emptyStateView)
     }
+    
+    func presentSafariVC(with url: URL) {
+        let safari = SFSafariViewController(url: url)
+        safari.preferredControlTintColor = .systemGreen
+        present(safari, animated: true)
+    }
+    
 }
