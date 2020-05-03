@@ -1,14 +1,14 @@
-//
-//  GFAlertVC.swift
-//  GHFollowers
-//
-//  Created by Faisal Babkoor on 2/8/20.
-//  Copyright © 2020 Faisal Babkoor. All rights reserved.
-//
-
-import UIKit
-
-class GFAlertVC: UIViewController {
+ //
+ //  GFAlertVC.swift
+ //  GHFollowers
+ //
+ //  Created by Faisal Babkoor on 2/8/20.
+ //  Copyright © 2020 Faisal Babkoor. All rights reserved.
+ //
+ 
+ import UIKit
+ 
+ class GFAlertVC: UIViewController {
     
     let containerView = GFContainerView()
     let titleLabel = GFTitleLabel(textAlignment: .center, fontSize: 20)
@@ -38,6 +38,8 @@ class GFAlertVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.black.withAlphaComponent(0.75)
+        view.addSubview(containerView)
+        containerView.addSubviews(titleLabel, bodyLabel, actionButton)
         
         configureContainerView()
         configureTitleLabel()
@@ -47,7 +49,6 @@ class GFAlertVC: UIViewController {
     
     
     func configureContainerView() {
-        view.addSubview(containerView)
         
         NSLayoutConstraint.activate([
             containerView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -59,7 +60,6 @@ class GFAlertVC: UIViewController {
     
     
     func configureTitleLabel() {
-        containerView.addSubview(titleLabel)
         titleLabel.text = alertTitle ?? "Somthing went wrong..."
         
         NSLayoutConstraint.activate([
@@ -72,7 +72,6 @@ class GFAlertVC: UIViewController {
     
     
     func configureMessageLabel() {
-        containerView.addSubview(bodyLabel)
         bodyLabel.text = message ?? "Unable to complete requrest"
         bodyLabel.numberOfLines = 4
         
@@ -86,7 +85,6 @@ class GFAlertVC: UIViewController {
     
     
     func configureActionButton() {
-        containerView.addSubview(actionButton)
         actionButton.setTitle(buttonTitle ?? "OK", for: .normal)
         actionButton.addTarget(self, action: #selector(dismissVC), for: .touchUpInside)
         
@@ -103,5 +101,4 @@ class GFAlertVC: UIViewController {
     @objc func dismissVC() {
         dismiss(animated: true)
     }
-    
-}
+ }

@@ -18,20 +18,20 @@ class GFItemInfoView: UIView {
     let titleLabel = GFTitleLabel(textAlignment: .left, fontSize: 14)
     let countLabel = GFTitleLabel(textAlignment: .center, fontSize: 14)
     
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         configure()
     }
     
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    
     private func configure() {
-        addSubview(symbolImageView)
-        addSubview(titleLabel)
-        addSubview(countLabel)
-        
+        addSubviews(symbolImageView, titleLabel, countLabel)
         symbolImageView.translatesAutoresizingMaskIntoConstraints = false
         symbolImageView.tintColor = .label
         symbolImageView.contentMode = .scaleAspectFill
@@ -55,23 +55,27 @@ class GFItemInfoView: UIView {
         ])
     }
     
+    
     func set(itemInfoType: ItemInfoType, count: Int) {
         switch itemInfoType {
+            
         case .repos:
-            configure(image: SFSymbols.repos, title: "Public Repos")
+            symbolImageView.image = SFSymbols.repos
+            titleLabel.text = "Public Repos"
+            
         case .gists:
-            configure(image: SFSymbols.gist, title: "Public Gists")
+            symbolImageView.image = SFSymbols.gist
+            titleLabel.text = "Public Gists"
+            
         case .followers:
-            configure(image: SFSymbols.follower, title: "Follower")
+            symbolImageView.image = SFSymbols.follower
+            titleLabel.text = "Follower"
+            
         case .following:
-            configure(image: SFSymbols.following, title: "Following")
+            symbolImageView.image = SFSymbols.following
+            titleLabel.text = "Following"
         }
+        
         countLabel.text = String(count)
     }
-    
-    private func configure(image: String, title: String) {
-        symbolImageView.image = UIImage(systemName: image)
-        titleLabel.text = title
-    }
-    
 }

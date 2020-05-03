@@ -10,13 +10,15 @@ import UIKit
 
 class GFAvatarImageView: UIImageView {
     
-    let placeholder = #imageLiteral(resourceName: "avatar-placeholder")
+    let placeholder = Images.placeholder
     let cache = NetworkManager.shared.cache
-
+    
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         configure()
     }
+    
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -29,7 +31,7 @@ class GFAvatarImageView: UIImageView {
         clipsToBounds = true
         translatesAutoresizingMaskIntoConstraints = false
     }
-
+    
     
     func downloadImage(from urlString: String) {
         let cacheKey = NSString(string: urlString)
@@ -48,5 +50,13 @@ class GFAvatarImageView: UIImageView {
             self.cache.setObject(image, forKey: cacheKey)
             DispatchQueue.main.async { self.image = image }
         }.resume()
+    }
+    
+    
+    func downloadAvatarImage(fromURL url: String) {
+        NetworkManager.shared.downloadImage(from: url) { [weak self] avatarImage in
+            guard let self = self else { return }
+            self.image = avatarImage
+        }
     }
 }

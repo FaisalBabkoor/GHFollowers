@@ -8,15 +8,14 @@
 
 import UIKit
 
-protocol FollowerListVCDelegate: class {
-    func didRequestFollowers(for username: String)
-}
 
-class FollowerListVC: UIViewController {
+
+class FollowerListVC: GFDataLoadingVC {
     
     enum Sections {
         case main
     }
+    
     
     var name: String!
     var collectionView: UICollectionView!
@@ -26,6 +25,20 @@ class FollowerListVC: UIViewController {
     var hasMoreFollowers = true
     var filterFollowers = [Follower]()
     var isSearching = false
+    var isLoadingMoreFollowers = false
+    
+    
+    init(username: String) {
+        super.init(nibName: nil, bundle: nil)
+        name = username
+        title = username
+    }
+    
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -62,7 +75,6 @@ class FollowerListVC: UIViewController {
     func configureSearchController() {
         let search = UISearchController()
         search.searchResultsUpdater = self
-        search.searchBar.delegate = self
         search.searchBar.placeholder = "Search for a username"
         search.obscuresBackgroundDuringPresentation = false
         navigationItem.searchController = search
@@ -72,23 +84,22 @@ class FollowerListVC: UIViewController {
     
     func getFollowers(username: String, page: Int) {
         showLoadingView()
+        isLoadingMoreFollowers = true
+        hasMoreFollowers = true
         NetworkManager.shared.getFollowers(for: name, page: page) { [weak self] result in
             guard let self = self else { return }
             self.dismissLoadingView()
+            
             switch result {
             case .success(let followers):
-                if followers.count < 100 { self.hasMoreFollowers = false }
-                self.followers.append(contentsOf: followers)
+                self.updateUI(with: followers)
                 
-                if followers.isEmpty {
-                    let message = "This user doesn't have any followers. Go follow them 😄"
-                    DispatchQueue.main.async {self.showEmptyStateView(for: message, in: self.view)}
-                }
-                
-                self.updateData(on: self.followers)
             case .failure(let error):
                 self.presentGFAlertOnMainThread(alertTitle: "BAD BAD", message: error.rawValue, buttonTitle: "OK")
             }
+            
+            self.isLoadingMoreFollowers = false
+            self.isSearching = false
         }
     }
     
@@ -114,22 +125,46 @@ class FollowerListVC: UIViewController {
     
     @objc func addButtonTapped() {
         showLoadingView()
-        NetworkManager.shared.getUserInfo(for: name) { result in
+        
+        NetworkManager.shared.getUserInfo(for: name) { [weak self] result in
+            guard let self = self else { return }
             self.dismissLoadingView()
+            
             switch result {
             case .success(let user):
-                let follower = Follower(login: user.login, avatarUrl: user.avatarUrl)
-                PersistenceManager.updateWith(favorite: follower, actionType: .add) { error in
-                    if let error = error {
-                        self.presentGFAlertOnMainThread(alertTitle: "Something went wrong", message: error.rawValue, buttonTitle: "OK")
-                        return
-                    }
-                    self.presentGFAlertOnMainThread(alertTitle: "Success", message: "You have successfully favorited this user 🎉", buttonTitle: "Hooray!")
-                    
-                }
+                self.addUserToFavorites(user: user)
+                
             case .failure(let error):
                 self.presentGFAlertOnMainThread(alertTitle: "Something went wrong", message: error.rawValue, buttonTitle: "OK")
             }
+        }
+    }
+    
+    
+    func updateUI(with followers: [Follower]) {
+        if followers.count < 100 { self.hasMoreFollowers = false }
+        self.followers.append(contentsOf: followers)
+        
+        if followers.isEmpty {
+            let message = "This user doesn't have any followers. Go follow them 😄"
+            DispatchQueue.main.async {self.showEmptyStateView(for: message, in: self.view)}
+        }
+        
+        self.updateData(on: self.followers)
+    }
+    
+    
+    func addUserToFavorites(user: User) {
+        let follower = Follower(login: user.login, avatarUrl: user.avatarUrl)
+        
+        PersistenceManager.updateWith(favorite: follower, actionType: .add) { [weak self] error in
+            guard let self = self else { return }
+            if let error = error {
+                self.presentGFAlertOnMainThread(alertTitle: "Something went wrong", message: error.rawValue, buttonTitle: "OK")
+                return
+            }
+            
+            self.presentGFAlertOnMainThread(alertTitle: "Success", message: "You have successfully favorited this user 🎉", buttonTitle: "Hooray!")
         }
     }
 }
@@ -143,7 +178,7 @@ extension FollowerListVC: UICollectionViewDelegate {
         let height = scrollView.frame.height
         
         if offsetY > contentSize - height {
-            guard hasMoreFollowers else { return }
+            guard hasMoreFollowers, !isLoadingMoreFollowers else { return }
             page += 1
             getFollowers(username: name, page: page)
         }
@@ -162,22 +197,21 @@ extension FollowerListVC: UICollectionViewDelegate {
 }
 
 
-extension FollowerListVC: UISearchResultsUpdating, UISearchBarDelegate {
+extension FollowerListVC: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
-        guard let filter = searchController.searchBar.text, !filter.isEmpty else { return }
+        guard let filter = searchController.searchBar.text, !filter.isEmpty else {
+            isSearching = false
+            filterFollowers.removeAll()
+            updateData(on: followers)
+            return
+        }
         filterFollowers = followers.filter{$0.login.lowercased().contains(filter.lowercased())}
         isSearching = true
         updateData(on: filterFollowers)
     }
-    
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        isSearching = false
-        filterFollowers.removeAll()
-        updateData(on: followers)
-    }
 }
 
-extension FollowerListVC: FollowerListVCDelegate {
+extension FollowerListVC: UserInfoVCDelegate {
     
     func didRequestFollowers(for username: String) {
         self.name = username

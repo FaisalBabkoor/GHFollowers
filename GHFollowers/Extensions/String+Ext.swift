@@ -9,16 +9,16 @@
 import Foundation
 
 extension String {
-    func convertToDate() -> Date? {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-        dateFormatter.locale = Locale(identifier: "ar")
-        dateFormatter.timeZone = .current
-        return dateFormatter.date(from: self)
-    }
-    
-    var convertToDisplayFormate: String {
-        guard let date = convertToDate() else { return "N/A" }
-        return date.convertToMonthYearFormate()
-    }
+//    func convertToDate() -> Date? {
+//        let dateFormatter = DateFormatter()
+//        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+//        dateFormatter.locale = Locale(identifier: "ar")
+//        dateFormatter.timeZone = .current
+//        return dateFormatter.date(from: self)
+//    }
+//
+//    var convertToDisplayFormate: String {
+//        guard let date = convertToDate() else { return "N/A" }
+//        return date.convertToMonthYearFormate()
+//    }
 }

@@ -29,14 +29,13 @@ class FavoriteCell: UITableViewCell {
     
     func set(favorite: Follower) {
         self.username.text = favorite.login
-        self.avatarImage.downloadImage(from: favorite.avatarUrl)
+        avatarImage.sizeToFit()
+        avatarImage.downloadImage(from: favorite.avatarUrl)
     }
     
     
     private func configure() {
-        addSubview(avatarImage)
-        addSubview(username)
-        
+        addSubviews(avatarImage, username)
         accessoryType = .disclosureIndicator
         let padding: CGFloat = 12
         
@@ -51,6 +50,5 @@ class FavoriteCell: UITableViewCell {
             username.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -padding),
             username.heightAnchor.constraint(equalToConstant: 40),
         ])
-        
     }
 }
